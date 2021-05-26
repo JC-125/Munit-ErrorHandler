@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="ee6a3c07-f7a7-4f37-a03a-5719160e9159" >
+		<http:listener-connection host="0.0.0.0" port="8082" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="b34910b2-9c31-4185-b61f-5eddafe321e1" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="root" database="test" />
+	</db:config>
+	<flow name="munit-demo2-errorhandlerFlow" doc:id="8fb5b652-32cf-4661-b729-3d568e6693d9" >
+		<http:listener doc:name="Listener" doc:id="4a205705-3a1a-46a3-8494-8680b147056f" config-ref="HTTP_Listener_config" path="/munit2">
+			<http:error-response statusCode="#[vars.httpStatus]">
+				<http:body ><![CDATA[#[payload]]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<set-variable value="#[attributes.queryParams.name]" doc:name="Set Variable" doc:id="e702fcb5-822b-456f-8054-a32ac9034595" variableName="name"/>
+		<choice doc:name="Choice" doc:id="0b18473b-81af-493a-9888-8d48389b3c9b" >
+			<when expression='#[vars.name == null]'>
+				<raise-error doc:name="Raise error" doc:id="4cd8d7a2-6f04-480f-b7b6-a9ea42af3e0a" type="APP:INVALID_INPUT" description="APP:INVALID_INPUT"/>
+			</when>
+			<otherwise>
+				<db:select doc:name="Select" doc:id="1b163ff0-907a-49b0-b1aa-03c2dd082695" config-ref="Database_Config">
+			<db:sql><![CDATA[select * from munitCustomer where name = :name]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+	name: vars.name
+}]]]></db:input-parameters>
+		</db:select>
+				<choice doc:name="Choice" doc:id="820e62dc-1030-4b38-95c3-3ef3e498edec">
+			<when expression="#[sizeOf(payload)&gt;0]">
+				<ee:transform doc:name="Transform Message" doc:id="23e4abd9-a0db-4c85-84df-928cf77c6485">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+					<otherwise>
+				<ee:transform doc:name="Transform Message" doc:id="d478369b-48ae-4a6d-bb18-f811ef5e4938">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "Records Not found"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+			</otherwise>
+		</choice>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="e5a5942d-9375-41d3-8d36-4cb03fa374f1" type="APP:INVALID_INPUT">
+				<ee:transform doc:name="Transform Message" doc:id="b49b2397-6b1f-421e-8284-b7d2cda7b49a" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"error":error.description,
+	"type": error.errorType
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="639ccc44-3426-45ea-8511-fa8a102f2b10" type="DB:CONNECTIVITY" >
+				<ee:transform doc:name="Transform Message" doc:id="4b7427a8-a096-458d-9e10-6ea8a5e22127" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	error:"DB CONNECTIVITY"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<logger level="INFO" doc:name="Logger" doc:id="e944ae0e-111f-4932-8d86-8aea8fe27b85" message="CONTINUE....." />
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>

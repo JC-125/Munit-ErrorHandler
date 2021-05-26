@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="munit-demo2-errorhandler-test-suite.xml" />
+	<munit:test name="munit-demo2-errorhandler-test-suite-munit-demo2-errorhandlerFlowTest" doc:id="e35b38e7-977f-46ac-872c-2bc7ddf57138" description="Test">
+		<munit:execution>
+			<try doc:name="Try" doc:id="f526713f-77d3-49da-8e9c-2dc3faa9f703" >
+				<flow-ref doc:name="Flow-ref to munit-demo2-errorhandlerFlow" doc:id="579f1c06-69a6-4cb8-a66a-6e933f7ce33f" name="munit-demo2-errorhandlerFlow" />
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="a642b390-5094-4489-ac8c-54890b08f449" >
+						<logger level="INFO" doc:name="Logger" doc:id="0110fd62-f1ca-4663-a9a4-7753ee5a0f1c" message="CONTINUE...."/>
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="175ded07-2158-45cb-92ab-915a89ca97e7" expression='#[payload.error]' is="#[MunitTools::equalTo('APP:INVALID_INPUT')]"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

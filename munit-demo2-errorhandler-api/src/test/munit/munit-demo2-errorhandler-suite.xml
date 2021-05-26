@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="munit-demo2-errorhandler-suite.xml" />
+	<munit:test name="munit-demo2-errorhandlerFlow-test" doc:id="97cff6b7-f4a8-4e09-be99-d7c901398a85" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Select" doc:id="149664dc-b3f8-4306-9d9d-f7f175173387" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="1b163ff0-907a-49b0-b1aa-03c2dd082695" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/java --- readUrl('classpath://munitdemo2errorhandlerFlowtest\mock_payload.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					<munit-tools:variables >
+						<munit-tools:variable key="name" value="#[output application/java --- readUrl('classpath://munitdemo2errorhandlerFlowtest\mock_variable_1.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="17cf51de-1e01-4a7c-a93c-3173dc762d12" >
+				<munit:payload value="#[readUrl('classpath://munitdemo2errorhandlerFlowtest\set-event_payload.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://munitdemo2errorhandlerFlowtest\set-event_attributes.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to munit-demo2-errorhandlerFlow" doc:id="d4fd10c6-801b-435b-a240-bcebbc0fb3a5" name="munit-demo2-errorhandlerFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="7ef2a446-c58c-4608-8b5a-bd93232abfa7" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import munitdemo2errorhandlerFlowtest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="munit-demo2-errorhandlerFlow-noRecords" doc:id="8282a95e-be1b-44c4-be7f-e566e4f75012" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Select" doc:id="02cff20a-7fbd-4d44-aa64-05d01f2e803a" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="1b163ff0-907a-49b0-b1aa-03c2dd082695" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/java --- readUrl('classpath://munitdemo2errorhandlerFlowtest1\mock_payload.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					<munit-tools:variables >
+						<munit-tools:variable key="name" value="#[output application/java --- readUrl('classpath://munitdemo2errorhandlerFlowtest1\mock_variable_.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="e675ac1b-1df3-433e-a767-6bb736e40c1e" >
+				<munit:payload value="#[readUrl('classpath://munitdemo2errorhandlerFlowtest1\set-event_payload.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://munitdemo2errorhandlerFlowtest1\set-event_attributes.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to munit-demo2-errorhandlerFlow" doc:id="20c41092-1b60-4f0e-9f7c-cfc8c527b6d9" name="munit-demo2-errorhandlerFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="3bb6e598-65a8-4df3-b6d4-569acb42b2ab" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import munitdemo2errorhandlerFlowtest1::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="munit-demo2-errorhandlerFlow-Error" doc:id="87a042d6-bc94-4788-b495-e8999d7ea25e" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Select" doc:id="ddb2a678-5d64-4d87-9001-55b5fa486d3b" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="1b163ff0-907a-49b0-b1aa-03c2dd082695" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="DB:CONNECTIVITY " />
+					<munit-tools:variables >
+						<munit-tools:variable key="name" value="#[output application/java --- readUrl('classpath://munitdemo2errorhandlerFlowtest1\mock_variable_.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			
+</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="2de44dfa-146e-4250-9615-514bbb5c351f">
+				<munit:payload value="#[readUrl('classpath://munitdemo2errorhandlerFlowtest1\set-event_payload.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://munitdemo2errorhandlerFlowtest1\set-event_attributes.dwl')]" />
+			</munit:set-event>
+		
+</munit:behavior>
+		<munit:execution>
+			<try doc:name="Try" doc:id="5deb0fdc-4e9b-44bf-b2c2-d282b8649634" >
+				<flow-ref doc:name="Flow-ref to munit-demo2-errorhandlerFlow" doc:id="a5ecdb20-d257-40ba-b316-14f72ef8e463" name="munit-demo2-errorhandlerFlow" />
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="327c4965-3c77-490a-abb0-fc2e6e18d8e5" >
+						<logger level="INFO" doc:name="Logger" doc:id="f8a8583a-6812-4835-8190-3db3bd02398c" message="continue...."/>
+					</on-error-continue>
+				</error-handler>
+			</try>
+
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="09758593-e018-45a4-be9b-53e850f69545" expression="#[payload.error]" is="#[MunitTools::equalTo('DB CONNECTIVITY')]"/>
+
+		</munit:validation>
+	
+</munit:test>
+</mule>
